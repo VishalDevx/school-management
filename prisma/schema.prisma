@@ -1,12 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -14,49 +7,246 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model admin{
-  id Int @id @default(autoincrement())
-  name String 
-  email String @unique
+// ------------------------
+// Admin
+// ------------------------
+model Admin {
+  id       Int     @id @default(autoincrement())
+  name     String?
+  email    String  @unique
   password String
 }
 
-model student{
-  id Int @id @default(autoincrement())
-  name String
-  fatherName String 
-  motherName String 
-  dob DateTime
-  class Class
-  gender Gender
-  address String
-  profilePic String?
-  rollNo String @unique
-  bloodGroup String?
-  contactNo String?
-  createdAt DateTime @default(now())
+// ------------------------
+// Student
+// ------------------------
+model Student {
+  id           Int       @id @default(autoincrement())
+  name         String
+  fatherName   String
+  motherName   String
+  gender       Gender
+  grade        Grade
+  dob          DateTime
+  address      String
+  profilePic   String?
+  rollNumber   String    @unique
+  bloodGroup   String?
+  mobileNumber String?
+  createdAt    DateTime  @default(now())
 
+  // Relations
+  studentFees     StudentFee[]
+  feeHistory      FeeHistory[]
+  payments        Payment[]
+  receipts        PaymentReceipt[]
+  results         Result[]
 }
-model staff{
-  id Int @id @default(autoincrement())
-  name String 
-  email String @unique
-  password String
-  subject String
-  qualification String
 
-}
-model expense{
-  id Int @id @default(autoincrement())
-}
-enum  Gender{
-  Male 
-  Famale
-  Others
+// ------------------------
+// Staff
+// ------------------------
+model Staff {
+  id            Int      @id @default(autoincrement())
+  name          String
+  gender        Gender
+  dob           DateTime
+  phoneNumber   String
+  email         String   @unique
+  password      String
+  address       String
+  profilePic    String?
+  qualification String?
+  subject       String
+  university    String?
 
+  classTeacher  ClassTeacher?
 }
-enum Class{
-    NURSERY
+
+// ------------------------
+// Class Teacher
+// ------------------------
+model ClassTeacher {
+  id       Int    @id @default(autoincrement())
+  staffId  Int    @unique
+  grade    Grade  @unique
+
+  staff    Staff   @relation(fields: [staffId], references: [id])
+  results  Result[]
+
+  @@map("class_teacher")
+}
+
+// ------------------------
+// Fee Structure
+// ------------------------
+model FeeStructure {
+  id          Int       @id @default(autoincrement())
+  name        String
+  amount      Float
+  month       DateTime
+  grade       Grade
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  studentFees StudentFee[]
+}
+
+// ------------------------
+// Student Fee
+// ------------------------
+model StudentFee {
+  id             Int          @id @default(autoincrement())
+  status         FeeStatus    @default(PENDING)
+  totalFee       Float
+  paidAmount     Float        @default(0)
+  dueAmount      Float
+  dueDate        DateTime
+  studentId      Int
+  feeStructureId Int
+
+  student        Student      @relation(fields: [studentId], references: [id])
+  feeStructure   FeeStructure @relation(fields: [feeStructureId], references: [id])
+  feeHistories   FeeHistory[]
+  payments       Payment[]
+  receipts       PaymentReceipt[]
+}
+
+// ------------------------
+// Fee History
+// ------------------------
+model FeeHistory {
+  id           Int        @id @default(autoincrement())
+  changeType   String
+  oldAmount    Float
+  newAmount    Float
+  status       FeeStatus
+  note         String?
+  pdfUrl       String?
+  changedAt    DateTime   @default(now())
+  studentFeeId Int
+
+  studentFee   StudentFee @relation(fields: [studentFeeId], references: [id])
+
+  Student Student[]
+}
+
+// ------------------------
+// Payment
+// ------------------------
+model Payment {
+  id             String         @id @default(uuid())
+  amount         Float
+  method         PaymentMethod
+  transactionId  String?
+
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @default(now())
+  studentId      Int?
+  studentFeeId   Int
+
+  student        Student?       @relation(fields: [studentId], references: [id])
+  studentFee     StudentFee     @relation(fields: [studentFeeId], references: [id])
+  receipt        PaymentReceipt?
+}
+
+// ------------------------
+// Payment Receipt
+// ------------------------
+model PaymentReceipt {
+  id           String   @id @default(uuid())
+  receiptNo    String   @unique
+  paymentId    String   @unique
+  issuedAt     DateTime @default(now())
+
+  payment      Payment  @relation(fields: [paymentId], references: [id])
+
+  StudentFee StudentFee[]
+
+  Student Student[]
+}
+
+// ------------------------
+// Expense Tracker
+// ------------------------
+model ExpenseTracker {
+  id          Int             @id @default(autoincrement())
+  title       String
+  amount      Float
+  type        TransactionType
+  description String
+  date        DateTime
+  category    String?
+  createdAt   DateTime        @default(now())
+}
+
+// ------------------------
+// Exam
+// ------------------------
+model Exam {
+  id        Int       @id @default(autoincrement())
+  name      String
+  subject   String
+  date      DateTime
+  maxMarks  Int
+  grade     Grade
+
+  results   Result[]
+}
+
+// ------------------------
+// Result
+// ------------------------
+model Result {
+  id             Int       @id @default(autoincrement())
+  studentId      Int
+  classTeacherId Int
+  examId         Int
+  subject        String
+  marksObtained  Float
+  totalMarks     Float
+  examType       String
+  remarks        String?
+  date           DateTime  @default(now())
+
+  student        Student      @relation(fields: [studentId], references: [id])
+  classTeacher   ClassTeacher @relation(fields: [classTeacherId], references: [id])
+  exam           Exam         @relation(fields: [examId], references: [id])
+}
+
+// ------------------------
+// Enums
+// ------------------------
+enum TransactionType {
+  CREDIT
+  DEBIT
+}
+
+
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  CREDIT_CARD
+  UPI
+  PAYPAL
+}
+
+enum FeeStatus {
+  PENDING
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHERS
+}
+
+enum Grade {
+  NURSERY
   LKG
   UKG
   FIRST
