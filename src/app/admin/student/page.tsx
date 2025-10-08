@@ -1,24 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation"; // ✅ Add this
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Users } from "lucide-react";
+import { useRouter } from "next/navigation";
+import AddStudentForm from "@/components/form/AddStudentForm";
 
 type Grade =
-  | "NURSERY"
-  | "LKG"
-  | "UKG"
-  | "FIRST"
-  | "SECOND"
-  | "THIRD"
-  | "FOURTH"
-  | "FIFTH"
-  | "SIXTH"
-  | "SEVENTH"
-  | "EIGHTH"
-  | "NINTH"
-  | "TENTH";
+  | "NURSERY" | "LKG" | "UKG" | "FIRST" | "SECOND" | "THIRD"
+  | "FOURTH" | "FIFTH" | "SIXTH" | "SEVENTH" | "EIGHTH"
+  | "NINTH" | "TENTH";
 
 interface Student {
   id: string;
@@ -33,13 +24,16 @@ interface Student {
 export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
-  const router = useRouter(); // ✅ Initialize router
+  const [showAddForm, setShowAddForm] = useState(false);
+
+  const router = useRouter();
 
   const grades: Grade[] = [
-    "NURSERY", "LKG", "UKG", "FIRST", "SECOND", "THIRD",
-    "FOURTH", "FIFTH", "SIXTH", "SEVENTH", "EIGHTH", "NINTH", "TENTH",
+    "NURSERY","LKG","UKG","FIRST","SECOND","THIRD",
+    "FOURTH","FIFTH","SIXTH","SEVENTH","EIGHTH","NINTH","TENTH",
   ];
 
+  // --- Fetch students ---
   useEffect(() => {
     async function loadStudents() {
       try {
@@ -69,17 +63,24 @@ export default function StudentsPage() {
     );
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <h1 className="text-4xl font-bold text-center mb-10 text-gray-800">
-        Classes Overview
-      </h1>
+    <div className="min-h-screen bg-gray-50 p-8 relative">
+      {/* Header with Add Button */}
+      <div className="flex justify-between items-center mb-10">
+        <h1 className="text-4xl font-bold text-gray-800">Classes Overview</h1>
+        <button
+          onClick={() => setShowAddForm(true)}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+        >
+          Add Student
+        </button>
+      </div>
 
+      {/* Class Cards */}
       <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {grades.map((grade) => (
           <motion.div
             key={grade}
             whileHover={{ scale: 1.05 }}
-            // ✅ Navigate to class route
             onClick={() => router.push(`/admin/student/${grade}`)}
             className="bg-white shadow-md rounded-2xl p-6 cursor-pointer border border-gray-200 hover:shadow-lg transition"
           >
@@ -88,12 +89,49 @@ export default function StudentsPage() {
               <Users className="text-blue-500" size={24} />
             </div>
             <p className="text-gray-600 mt-4">
-              Total Students:{" "}
-              <span className="font-semibold">{getCount(grade)}</span>
+              Total Students: <span className="font-semibold">{getCount(grade)}</span>
             </p>
           </motion.div>
         ))}
       </div>
+
+      {/* Add Student Modal */}
+      <AnimatePresence>
+        {showAddForm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          >
+            <motion.div
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.8 }}
+              className="bg-white p-6 rounded-2xl w-full max-w-lg shadow-lg"
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold">Add New Student</h2>
+                <button
+                  onClick={() => setShowAddForm(false)}
+                  className="text-gray-500 hover:text-gray-700 font-bold"
+                >
+                  X
+                </button>
+              </div>
+              <AddStudentForm
+                onSuccess={() => {
+                  setShowAddForm(false);
+                  // reload students after adding
+                  fetch("/api/admin/student", { cache: "no-store" })
+                    .then((res) => res.json())
+                    .then((data) => setStudents(data));
+                }}
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

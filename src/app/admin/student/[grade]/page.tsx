@@ -80,7 +80,7 @@ export default function ClassStudentsPage() {
               {students.map((s, i) => (
                 <tr
                   key={s.id}
-                  onClick={() => router.push(`/admin/student/${s.rollNumber}`)} // ✅ Route by rollNumber
+                  onClick={() => router.push(`/admin/student/${s.grade}/${s.rollNumber}`)} // ✅ Route by rollNumber
                   className="border-b hover:bg-gray-50 cursor-pointer transition-colors"
                 >
                   <td className="py-2 font-medium text-gray-800">{i + 1}</td>

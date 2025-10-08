@@ -27,7 +27,7 @@ export default function StudentProfilePage() {
   useEffect(() => {
     async function fetchStudent() {
       try {
-        const res = await fetch(`/api/admin/student/${grade}/${rollNumber}`, { cache: "no-store" });
+        const res = await fetch(`/api/admin/student/${rollNumber}`, { cache: "no-store" });
         if (!res.ok) throw new Error("Student not found");
 
         const data: Student = await res.json();

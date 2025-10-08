@@ -1,33 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createStudent } from "@/services/student";
-import { Prisma, Gender, Grade } from "@prisma/client"; // ✅ Import Prisma types & enums
+import { createStaff } from "@/services/staff";
+import { Gender, Grade } from "@prisma/client"; // enums
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    // ✅ Type-safe input construction
-    const data: Prisma.StudentCreateInput = {
+    // ✅ Convert dob to Date before sending to service
+    const staffData = {
       name: body.name,
-      fatherName: body.fatherName,
-      motherName: body.motherName,
-      gender: body.gender as Gender, // Prisma enums: "MALE", "FEMALE", etc.
-      grade: body.grade as Grade,
-      dob: new Date(body.dob),
+      gender: body.gender as Gender,
+      dob: new Date(body.dob), // <-- ensure Date type
+      phoneNumber: body.phoneNumber,
+      email: body.email,
+      password: body.password,
       address: body.address,
-      rollNumber: body.rollNumber,
       profilePic: body.profilePic ?? null,
-      bloodGroup: body.bloodGroup ?? null,
-      mobileNumber: body.mobileNumber ?? null,
+      qualification: body.qualification ?? null,
+      subject: body.subject,
+      university: body.university ?? null,
+      classTeacherGrade: body.classTeacherGrade as Grade | undefined,
     };
 
-    const newStudent = await createStudent(data);
+    const newStaff = await createStaff(staffData);
 
-    return NextResponse.json({ success: true, student: newStudent });
+    return NextResponse.json({ success: true, staff: newStaff });
   } catch (error) {
-    console.error("Error creating student:", error);
+    console.error("Error creating staff:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to create student" },
+      { success: false, message: "Failed to create staff" },
       { status: 500 }
     );
   }
