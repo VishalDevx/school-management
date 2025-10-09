@@ -58,9 +58,9 @@ export const updateStaff = async (staffId: number, data: Partial<StaffCreateInpu
 };
 
 // Get Staff with optional Class Teacher
-export const getStaffById = async (staffId: number) => {
+export const getStaffByEmail = async (email:string) => {
   return db.staff.findUnique({
-    where: { id: staffId },
+    where: { email },
     include: { classTeacher: true },
   });
 };

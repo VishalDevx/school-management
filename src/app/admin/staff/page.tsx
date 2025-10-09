@@ -70,7 +70,7 @@ export default function StaffPage() {
           <motion.div
             key={staff.id}
             whileHover={{ scale: 1.05 }}
-            onClick={() => router.push(`/admin/staff/${staff.id}`)}
+            onClick={() => router.push(`/admin/staff/${staff.email}`)}
             className="bg-white shadow-md rounded-2xl p-6 cursor-pointer border border-gray-200 hover:shadow-lg transition"
           >
             <div className="flex items-center justify-between">
@@ -117,7 +117,7 @@ export default function StaffPage() {
                 onSuccess={() => {
                   setShowAddForm(false);
                   // reload staff after adding
-                  fetch("/api/admin/staff", { cache: "no-store" })
+                  fetch("/api/admin/staff/add", { cache: "no-store" })
                     .then((res) => res.json())
                     .then((data) => setStaffList(data));
                 }}

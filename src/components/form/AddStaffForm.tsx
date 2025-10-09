@@ -39,7 +39,7 @@ export default function AddStaffForm({ onSuccess }: AddStaffFormProps) {
     setError(null);
 
     try {
-      const res = await fetch("/api/admin/staff", {
+      const res = await fetch("/api/admin/staff/add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -75,7 +75,7 @@ export default function AddStaffForm({ onSuccess }: AddStaffFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-white rounded-xl shadow-md">
+    <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-white rounded-xl text-black shadow-md">
       {error && <p className="text-red-500">{error}</p>}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import { getAllStaff } from "@/services/staff";
 
@@ -13,4 +13,8 @@ export async function GET() {
       { status: 500 }
     );
   }
+}
+export async function POST(req:NextRequest) {
+  
+  
 }
