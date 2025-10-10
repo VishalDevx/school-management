@@ -28,26 +28,30 @@ export const authOptions: NextAuthOptions = {
     }),
 
     // 🔹 STAFF
-    CredentialsProvider({
-      id: "staff",
-      name: "Staff Login",
-      credentials: {
-        email: { label: "Email", type: "text" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        if (!credentials) return null;
-        const { email, password } = credentials;
+   CredentialsProvider({
+  id: "staff",
+  name: "Staff Login",
+  credentials: {
+    email: { label: "Email", type: "text" },
+    password: { label: "Password", type: "password" },
+  },
+  async authorize(credentials) {
+    if (!credentials) return null;
+    const { email, password } = credentials;
 
-        const staff = await db.staff.findUnique({ where: { email } });
-        if (!staff) return null;
+    const staff = await db.staff.findUnique({ where: { email } });
+    if (!staff) return null;
 
-        const isValid = await compare(password, staff.password);
-        if (!isValid) return null;
+    const isValid =
+      staff.password === password ||
+      (await compare(password, staff.password).catch(() => false));
 
-        return { id: String(staff.id), name: staff.name, email, role: "STAFF" };
-      },
-    }),
+    if (!isValid) return null;
+
+    return { id: String(staff.id), name: staff.name, email, role: "STAFF" };
+  },
+}),
+
 
     // 🔹 STUDENT
     CredentialsProvider({
