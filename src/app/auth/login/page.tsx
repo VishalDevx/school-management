@@ -4,14 +4,9 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
-export default function Home() {
+export default function LoginPage() {
   const [role, setRole] = useState<"admin" | "staff" | "student">("student");
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-    rollNumber: "",
-    dob: "",
-  });
+  const [form, setForm] = useState({ email: "", password: "", rollNumber: "", dob: "" });
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -30,32 +25,25 @@ export default function Home() {
     });
 
     if (res?.ok) {
-      if (role === "admin") {
-        router.push("/admin");
-      } else if (role === "staff") {
-        router.push(`/staff/${form.email}`);
-      } else {
-        router.push(`/student/${form.rollNumber}`);
-      }
+      router.push(
+        role === "admin" ? "/admin" :
+        role === "staff" ? "/staff/${email}" :
+        "/student/${rollNumber}"
+      );
     } else {
       alert("Invalid credentials");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 text-black">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-2xl shadow-md w-full max-w-md space-y-6 border border-gray-100"
-      >
-        <h2 className="text-2xl font-bold text-center text-gray-800">
-          School Management Login
-        </h2>
+    <div className="h-screen flex items-center justify-center text-black bg-gray-50">
+      <form onSubmit={handleSubmit} className="bg-white p-8 rounded-2xl shadow-md w-96 space-y-6">
+        <h2 className="text-xl font-semibold text-center text-gray-800">Login</h2>
 
         <select
           value={role}
           onChange={(e) => setRole(e.target.value as any)}
-          className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none"
+          className="w-full border rounded-lg p-2"
         >
           <option value="student">Student</option>
           <option value="staff">Staff</option>
@@ -69,25 +57,21 @@ export default function Home() {
               className="w-full border rounded-lg p-2"
               value={form.rollNumber}
               onChange={(e) => setForm({ ...form, rollNumber: e.target.value })}
-              required
             />
             <input
               placeholder="Date of Birth (YYYY-MM-DD)"
               className="w-full border rounded-lg p-2"
               value={form.dob}
               onChange={(e) => setForm({ ...form, dob: e.target.value })}
-              required
             />
           </>
         ) : (
           <>
             <input
               placeholder="Email"
-              type="email"
               className="w-full border rounded-lg p-2"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
-              required
             />
             <input
               placeholder="Password"
@@ -95,7 +79,6 @@ export default function Home() {
               className="w-full border rounded-lg p-2"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
-              required
             />
           </>
         )}

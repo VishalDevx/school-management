@@ -13,7 +13,6 @@ import {
   GraduationCap,
   MapPin,
   BookOpen,
-  Eye,
 } from "lucide-react";
 
 import { StaffCreateInput } from "@/services/staff";
@@ -111,11 +110,6 @@ export default function StaffProfilePage() {
             value={staff.phoneNumber}
           />
           <InfoItem
-            icon={<Eye className="text-blue-500" size={20} />}
-            label="Password"
-            value={staff.password}
-          />
-          <InfoItem
             icon={<Calendar className="text-blue-500" size={20} />}
             label="Date of Birth"
             value={new Date(staff.dob).toLocaleDateString()}
@@ -124,7 +118,7 @@ export default function StaffProfilePage() {
             icon={<School className="text-blue-500" size={20} />}
             label="Class Teacher"
             value={staff.classTeacherGrade ?? "-"}
-          />   
+          />
         </div>
       </div>
 
